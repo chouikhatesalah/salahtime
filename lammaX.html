@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salah - Premium Time Display</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;600&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        :root {
+            --bg-primary: #f4f7ff;
+            --bg-secondary: #ffffff;
+            --text-primary: #0f111b;
+            --text-secondary: #36383b;
+            --accent: #3b48f6;
+            --accent-gradient: linear-gradient(135deg, #ff00d4, #2563eb);
+            --shadow: rgba(59, 130, 246, 0.1);
+            --container-bg: rgba(255, 255, 255, 0.98);
+            --success: #059669;
+            --warning: #d97706;
+            --error: #dc2626;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent: #fa6a60;
+            --accent-gradient: linear-gradient(135deg, #05ff05, #3b82f6);
+            --shadow: rgba(22, 106, 209, 0.2);
+            --container-bg: rgba(31, 41, 55, 0.98);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            font-family: 'Quicksand', sans-serif;
+            color: var(--text-primary);
+            position: relative;
+            padding: 2rem;
+        }
+
+        .controls {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .control-btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            box-shadow: 0 4px 12px var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            background: var(--accent);
+            color: white;
+        }
+
+        .clock-container {
+            text-align: center;
+            padding: 4rem;
+            background: var(--container-bg);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px var(--shadow);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 2.5rem;
+            animation: float 6s ease-in-out infinite;
+            filter: drop-shadow(0 4px 8px var(--shadow));
+        }
+
+        .site-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .time {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 5.5rem;
+            font-weight: 600;
+            margin: 1.5rem 0;
+            letter-spacing: -2px;
+            color: var(--accent);
+        }
+
+        .date {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .location {
+            font-size: 1.25rem;
+            color: var(--accent);
+            margin: 1.5rem 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2.5rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .watermark {
+            position: fixed;
+            bottom: 2rem;
+            padding: 1rem 2rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid rgba(6, 255, 180, 0.178);
+        }
+
+        .watermark i {
+            color: var(--accent);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .inspirational-quote {
+            margin-top: 2.5rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            font-weight: 400;
+            padding: 0 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .clock-container {
+                padding: 2.5rem 1.5rem;
+                margin: 1rem;
+            }
+            .time { 
+                font-size: 3.5rem; 
+                letter-spacing: -1px;
+            }
+            .date { font-size: 1.25rem; }
+            .site-title { font-size: 2.5rem; }
+            .stats {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .controls {
+                top: auto;
+                bottom: 5rem;
+                right: 50%;
+                transform: translateX(50%);
+            }
+            .watermark {
+                font-size: 0.9rem;
+                padding: 0.75rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button class="control-btn" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i>
+            <span>Theme</span>
+        </button>
+        <button class="control-btn" onclick="toggleFormat()">
+            <i class="fas fa-clock"></i>
+            <span>24h</span>
+        </button>
+    </div>
+
+    <div class="clock-container">
+        <img src="logohour.jpg" alt="Salah Logo" class="logo">
+        <h1 class="site-title">SALAH</h1>
+        <div class="time" id="time">00:00:00</div>
+        <div class="date" id="date">Loading...</div>
+        <div class="location">
+            <i class="fas fa-map-marker-alt"></i>
+            Algiers, Algeria
+            <i class="fas fa-globe-africa"></i>
+        </div>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="timezone">GMT+1</div>
+                <div class="stat-label">Timezone</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="week-day">-</div>
+                <div class="stat-label">Day</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="week-number">-</div>
+                <div class="stat-label">Week</div>
+            </div>
+        </div>
+        <div class="inspirational-quote" id="quote"></div>
+    </div>
+
+    <div class="watermark">
+        <i class="fas fa-heart"></i>
+        chouikatesalah@gmail.com
+        <i class="fas fa-heart"></i>
+    </div>
+
+    <script>
+        let is24Hour = true;
+        const quotes = [
+            "Mastering time with elegance",
+            "Every moment is precious",
+            "Time flows endlessly",
+            "Precision in every second",
+            "Crafting moments into memories"
+        ];
+
+        function updateClock() {
+            const now = new Date();
+            const algerianTime = new Date(now.toLocaleString('en-US', {
+                timeZone: 'Africa/Algiers'
+            }));
+
+            let hours = algerianTime.getHours();
+            const minutes = algerianTime.getMinutes().toString().padStart(2, '0');
+            const seconds = algerianTime.getSeconds().toString().padStart(2, '0');
+            
+            if (!is24Hour) {
+                const period = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12 || 12;
+                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds} ${period}`;
+            } else {
+                hours = hours.toString().padStart(2, '0');
+                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+            
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateStr = algerianTime.toLocaleDateString('en-US', options);
+            document.getElementById('date').textContent = dateStr;
+            
+            document.getElementById('week-day').textContent = 
+                algerianTime.toLocaleDateString('en-US', { weekday: 'short' });
+            document.getElementById('week-number').textContent = getWeekNumber(algerianTime);
+        }
+
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil(((d - yearStart) / 86400000 + 1)/7);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            
+            const icon = document.querySelector('.control-btn i.fa-moon, .control-btn i.fa-sun');
+            icon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        function toggleFormat() {
+            is24Hour = !is24Hour;
+            const formatBtn = document.querySelectorAll('.control-btn')[1];
+            formatBtn.querySelector('span').textContent = is24Hour ? '24h' : '12h';
+            updateClock();
+        }
+
+        function updateQuote() {
+            const quoteElement = document.getElementById('quote');
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            quoteElement.textContent = randomQuote;
+        }
+
+        // Initialize
+        updateClock();
+        updateQuote();
+        setInterval(updateClock, 1000);
+        setInterval(updateQuote, 15000);
+
+        // Smooth hover effect
+        const container = document.querySelector('.clock-container');
+        
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = container.offsetWidth / 2;
+            const centerY = container.offsetHeight / 2;
+            
+            const angleX = (y - centerY) / 50;
+            const angleY = (centerX - x) / 50;
+            
+            container.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            container.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+        });
+    </script>
+</body>
+</html>
